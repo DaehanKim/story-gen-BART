@@ -1,10 +1,11 @@
 """ accepts data of format Title <EOT> Story"""
 # TO DO enable it to take stories and titles or just stories
 import sys
-from allennlp.predictors.semantic_role_labeler import SemanticRoleLabelerPredictor
+# from allennlp.predictors.semantic_role_labeler import SemanticRoleLabelerPredictor
 # from semantic_role_labeler import SemanticRoleLabelerPredictor
 from allennlp.common.checks import check_for_gpu, ConfigurationError
-from allennlp.predictors.coref import CorefPredictor
+# from allennlp.predictors.coref import CorefPredictor
+from allennlp_models import pretrained
 from allennlp.models.archival import load_archive
 from tqdm import tqdm
 import argparse
@@ -272,6 +273,7 @@ if __name__ == '__main__':
     parser.add_argument('--save_coref_srl', type=str, help='dir for saving coref clusters and doc and srl for reusme')
     parser.add_argument('--label_story', type=str, help='dir for saving the stories after add ent label')
     parser.add_argument('--title', type=str, help='dir for saving the valid titles')
+    # parser.add_argument('--device', type=int, help='device number to use')
     # parser.add_argument('--reusem',  action='store true', help='reusem the coref, srl prediction')
     args = parser.parse_args()
 
@@ -293,30 +295,31 @@ if __name__ == '__main__':
     all_title = []
 
     all_json = []
-    # Corefpredictor = CorefPredictor.from_archive(load_archive(args.coref_model, args.cuda))
-    # for text in tqdm(articles):
-    #     # try:
-    #     #     title = text.split(" <EOT> ")[0]
-    #     # except:
-    #     #     print("title is empty, out of range")
-    #     try:
-    #         story = spacy_word_token(text, nlp)
-    #         #story = spacy_word_token(text.split(" <EOT> ")[1], nlp)
-    #     except:
-    #         print("story is empty, out of range")
-    #     try:
-    #         doc, clusters = coref_resolution(story,Corefpredictor)
-    #         all_json.append({"doc": doc, "clusters": clusters})
-    #
-    #     except RuntimeError:
-    #         print("Runtime Error")
-    #
-    # with open("test_short.json", "w") as fout:
-    #     json.dump(all_json, fout, ensure_ascii=False)
+    # coref-spanbert
+    Corefpredictor = pretrained.load_predictor(args.coref_model, cuda_device=args.cuda)
+    for text in tqdm(articles):
+        # try:
+        #     title = text.split(" <EOT> ")[0]
+        # except:
+        #     print("title is empty, out of range")
+        try:
+            story = spacy_word_token(text, nlp)
+            #story = spacy_word_token(text.split(" <EOT> ")[1], nlp)
+        except:
+            print("story is empty, out of range")
+        try:
+            doc, clusters = coref_resolution(story,Corefpredictor)
+            all_json.append({"doc": doc, "clusters": clusters})
+    
+        except RuntimeError:
+            print("Runtime Error")
+    
+    with open("test_short.json", "w") as fout:
+        json.dump(all_json, fout, ensure_ascii=False)
 
 
     # Now to SRL
-    SRLpredictor = SemanticRoleLabelerPredictor.from_archive(load_archive(args.srl_model, args.cuda))
+    SRLpredictor = pretrained.load_predictor(args.srl_model, cuda_device=args.cuda)
     with open("test_short.json", "r") as fin:
         docs_clusters = json.load(fin)
         for text in tqdm(docs_clusters):

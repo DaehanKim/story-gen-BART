@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-cd ~/PycharmProjects/Plan-and-write/
+# cd ~/PycharmProjects/Plan-and-write/
 # run from root dir
 types="test valid train"
-parent_dir="data/writingPrompts/original/test/"
-coref_model="preprocessing/pretrained/coref-model-2018.02.05"
-srl_model="preprocessing/pretrained/bert-base-srl-2019.06.17" #"pretrained/srl-model-2018.05.25"
+parent_dir="data/writingPrompts/"
+coref_model="coref-spanbert"
+srl_model="structured-prediction-srl-bert" 
 
 ## generate storylines
 #for type in ${types}; do
@@ -16,13 +16,13 @@ srl_model="preprocessing/pretrained/bert-base-srl-2019.06.17" #"pretrained/srl-m
 #generate storylnes by SRL
 echo "Extracting SRL Plots..."
 for type in ${types}; do
-    python preprocessing/srl_storyline_processing/srl_to_storyline.py --input_file ${parent_dir}${type}.wp_target --output_file ${parent_dir}WP.storyline_dic.${type}.json --save_coref_srl ${parent_dir}WP.srl_coref.${type}.json --label_story ${parent_dir}WP.label_story.${type} --coref_model ${coref_model} --srl_model ${srl_model} --batch 8 --cuda -1
+    python srl_to_storyline.py --input_file ${parent_dir}${type}.wp_target --output_file ${parent_dir}WP.storyline_dic.${type}.json --save_coref_srl ${parent_dir}WP.srl_coref.${type}.json --label_story ${parent_dir}WP.label_story.${type} --coref_model ${coref_model} --srl_model ${srl_model} --batch 64 --cuda 5
 done
 
 echo "Assembling final file format..."
 #change storyline format for dictionary to just string
 for type in ${types}; do
-    python preprocessing/srl_storyline_processing/prepare_SRL_storyline_format.py --input_file ${parent_dir}WP.storyline_dic.${type}.json --output_file ${parent_dir}WP.storyline.${type}
+    python prepare_SRL_storyline_format.py --input_file ${parent_dir}WP.storyline_dic.${type}.json --output_file ${parent_dir}WP.storyline.${type}
 done
 
 #for type in ${types}; do
