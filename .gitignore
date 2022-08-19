@@ -133,3 +133,4 @@ experimental/*
 
 STORYEMNLP/*
 srl_plot_preprocessing/srl_storyline_processing/data/*
+srl_plot_preprocessing/srl_storyline_processing/test_short.json

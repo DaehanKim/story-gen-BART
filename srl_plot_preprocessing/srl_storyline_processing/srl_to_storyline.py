@@ -16,6 +16,7 @@ import re
 import io
 import spacy
 import os
+from transformers import AutoTokenizer
 
 # import myownallennlp.allennlp.predictors as PaperClassifierPredictor
 # from myownallennlp.allennlp.dataset_readers import SemanticScholarDatasetReader
@@ -85,7 +86,7 @@ def coref_resolution(text, CorefPredictor):
     result = CorefPredictor.predict_tokenized(text)
     return result.get("document"), result.get("clusters")
 
-
+tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 def SRL(text, SRLpredictor, batch_size):
     """
     :param text: a string of  story
@@ -94,8 +95,15 @@ def SRL(text, SRLpredictor, batch_size):
     :param cuda_device: if it >=0, it will load archival model on GPU otherwise CPU
     :return: all predictions after srl
     """
+    from typing import Dict
+    def _truncate(batch : Dict) :
+        enc = tokenizer.encode(batch["sentence"], truncation=True)
+        truncated = tokenizer.decode(enc, skip_special_tokens=True)
+        return {"sentence" : truncated}
+
 
     def _run_predictor(batch_data):
+        
         if len(batch_data) == 1:
             result = SRLpredictor.predict_json(batch_data[0])
             # Batch results return a list of json objects, so in
@@ -112,7 +120,7 @@ def SRL(text, SRLpredictor, batch_size):
             line = {"sentence":line.strip()}
             line = json.dumps(line)
             json_data = SRLpredictor.load_line(line)
-            batch_data.append(json_data)
+            batch_data.append(_truncate(json_data))
             # print(batch_data)
             if len(batch_data) == batch_size:
                 predictions = _run_predictor(batch_data)
@@ -136,7 +144,7 @@ def SRL(text, SRLpredictor, batch_size):
 
 # range_list = parse(dec, doc, doc_current_index)
 def extract_storyline(doc, clusters, SRLpredictor,batch_size):
-    print(doc)
+    # print(doc)
     """
     After getting all srl anf coref clusters, we need check if one ARG is in clusters, if so we need to change it to "ent{}"
     :param doc:
@@ -268,7 +276,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_file', default="data/writingPrompts/WP.storyline_dic.test.json",type=str, help='path to output file')
     parser.add_argument('--coref_model', default="coref-spanbert",type=str, help='path to pretrained model weight for corefrence resolution')
     parser.add_argument('--srl_model', default="structured-prediction-srl-bert",type=str, help='path to pretrained mode weight for semantic role labeler')
-    parser.add_argument('--batch',type=int, default=64, help='The batch size to use for processing')
+    parser.add_argument('--batch',type=int, default=192, help='The batch size to use for processing')
     parser.add_argument('--cuda', type=int, default=5, help='id of GPU to use (if any)')
     parser.add_argument('--save_coref_srl', type=str, help='dir for saving coref clusters and doc and srl for reusme')
     parser.add_argument('--label_story', type=str, help='dir for saving the stories after add ent label')
@@ -294,26 +302,26 @@ if __name__ == '__main__':
 
     all_json = []
     # coref-spanbert
-    Corefpredictor = pretrained.load_predictor(args.coref_model, cuda_device=args.cuda)
-    for text in tqdm(articles):
-        # try:
-        #     title = text.split(" <EOT> ")[0]
-        # except:
-        #     print("title is empty, out of range")
-        try:
-            story = spacy_word_token(text, nlp)
-            #story = spacy_word_token(text.split(" <EOT> ")[1], nlp)
-        except:
-            print("story is empty, out of range")
-        try:
-            doc, clusters = coref_resolution(story,Corefpredictor)
-            all_json.append({"doc": doc, "clusters": clusters})
+    # Corefpredictor = pretrained.load_predictor(args.coref_model, cuda_device=args.cuda)
+    # for text in tqdm(articles):
+    #     # try:
+    #     #     title = text.split(" <EOT> ")[0]
+    #     # except:
+    #     #     print("title is empty, out of range")
+    #     try:
+    #         story = spacy_word_token(text, nlp)
+    #         #story = spacy_word_token(text.split(" <EOT> ")[1], nlp)
+    #     except:
+    #         print("story is empty, out of range")
+    #     try:
+    #         doc, clusters = coref_resolution(story,Corefpredictor)
+    #         all_json.append({"doc": doc, "clusters": clusters})
     
-        except RuntimeError:
-            print("Runtime Error")
+    #     except RuntimeError:
+    #         print("Runtime Error")
     
-    with open("test_short.json", "w") as fout:
-        json.dump(all_json, fout, ensure_ascii=False)
+    # with open("test_short.json", "w") as fout:
+    #     json.dump(all_json, fout, ensure_ascii=False)
 
 
     # Now to SRL

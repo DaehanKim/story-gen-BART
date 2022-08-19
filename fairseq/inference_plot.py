@@ -28,7 +28,7 @@ required.add_argument('--outfile', type=Path, help='Output file (e.g., val.hypo)
 optional.add_argument('--apply_disc', action='store_true',
                       help='Whether to use discriminators to rescore')
 optional.add_argument('--scorers', type=str, default='checkpoint/WP_scorers.tsv', help='TSV with discriminator info')
-optional.add_argument('--batch_size', type=int, default=1)
+optional.add_argument('--batch_size', type=int, default=64)
 optional.add_argument('--dedup', action='store_true')
 optional.add_argument('--banned_tok', nargs='+', default=["[", " [", "UN", " UN"], help="tokens to prevent generating")
 optional.add_argument('--max_len', type=int, default=250, help="Max length of generation in BPE tok")
@@ -46,7 +46,7 @@ bart_checkpoint = args.checkpoint
 bart = BARTModel.from_pretrained(
     bart_path,
     checkpoint_file=bart_checkpoint,
-    data_name_or_path='full'
+    # data_name_or_path='full'
 )
 
 

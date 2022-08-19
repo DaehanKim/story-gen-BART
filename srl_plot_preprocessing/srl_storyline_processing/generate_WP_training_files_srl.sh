@@ -16,7 +16,7 @@ srl_model="structured-prediction-srl-bert"
 #generate storylnes by SRL
 echo "Extracting SRL Plots..."
 for type in ${types}; do
-    python srl_to_storyline.py --input_file ${parent_dir}${type}.wp_target --output_file ${parent_dir}WP.storyline_dic.${type}.json --save_coref_srl ${parent_dir}WP.srl_coref.${type}.json --label_story ${parent_dir}WP.label_story.${type} --coref_model ${coref_model} --srl_model ${srl_model} --batch 128 --cuda 5
+    python srl_to_storyline.py --input_file ${parent_dir}${type}.wp_target --output_file ${parent_dir}WP.storyline_dic.${type}.json --save_coref_srl ${parent_dir}WP.srl_coref.${type}.json --label_story ${parent_dir}WP.label_story.${type} --coref_model ${coref_model} --srl_model ${srl_model} --batch 192 --cuda 5
 done
 
 echo "Assembling final file format..."

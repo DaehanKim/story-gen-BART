@@ -357,7 +357,7 @@ class Sampling(Search):
             probs = probs.expand(bsz, beam_size, -1)
 
         # gather scores
-        torch.gather(
+        self.scores_buf = torch.gather(
             probs,
             dim=2,
             index=self.indices_buf.unsqueeze(-1),
