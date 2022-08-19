@@ -264,17 +264,15 @@ def spacy_word_token(text,nlp):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_file', type=str, help='path to input file')
-    parser.add_argument('--output_file', type=str, help='path to output file')
-    parser.add_argument('--coref_model', type=str, help='path to pretrained model weight for corefrence resolution')
-    parser.add_argument('--srl_model', type=str, help='path to pretrained mode weight for semantic role labeler')
-    parser.add_argument('--batch', type=int, default=1, help='The batch size to use for processing')
-    parser.add_argument('--cuda', type=int, default=-1, help='id of GPU to use (if any)')
+    parser.add_argument('--input_file', default="data/writingPrompts/test.wp_target", type=str, help='path to input file')
+    parser.add_argument('--output_file', default="data/writingPrompts/WP.storyline_dic.test.json",type=str, help='path to output file')
+    parser.add_argument('--coref_model', default="coref-spanbert",type=str, help='path to pretrained model weight for corefrence resolution')
+    parser.add_argument('--srl_model', default="structured-prediction-srl-bert",type=str, help='path to pretrained mode weight for semantic role labeler')
+    parser.add_argument('--batch',type=int, default=64, help='The batch size to use for processing')
+    parser.add_argument('--cuda', type=int, default=5, help='id of GPU to use (if any)')
     parser.add_argument('--save_coref_srl', type=str, help='dir for saving coref clusters and doc and srl for reusme')
     parser.add_argument('--label_story', type=str, help='dir for saving the stories after add ent label')
     parser.add_argument('--title', type=str, help='dir for saving the valid titles')
-    # parser.add_argument('--device', type=int, help='device number to use')
-    # parser.add_argument('--reusem',  action='store true', help='reusem the coref, srl prediction')
     args = parser.parse_args()
 
     # Check GPU memeory.
