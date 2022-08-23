@@ -35,6 +35,8 @@ optional.add_argument('--max_len', type=int, default=250, help="Max length of ge
 required.add_argument('--bart_dir', type=Path, help="Path to directory with BART checkpoint", required=True)
 optional.add_argument('--checkpoint', type=str, default='checkpoint_best.pt',
                     help="Which checkpoint file to use for BART")
+optional.add_argument('--gpu', type=int, default=6,
+                    help="device id to use")
 
 args = parser.parse_args()
 print("Args: ", args, file=sys.stderr)
@@ -53,7 +55,7 @@ bart = BARTModel.from_pretrained(
 bart.eval()
 
 if use_cuda:
-    bart.cuda()
+    bart.cuda(args.gpu)
     bart.half()
 
 ### load discriminators

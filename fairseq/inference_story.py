@@ -24,14 +24,16 @@ optional.add_argument(
     help='Show this help message and exit'
 )
 
-required.add_argument('src', type=Path, help='Input file (e.g., val.source)')
-required.add_argument('out', type=Path, help='Output file (e.g., val.hypo)')
-optional.add_argument('--batch_size', type=int, default=1)
+required.add_argument('--infile', type=Path, help='Input file (e.g., val.source)', required=True)
+required.add_argument('--outfile', type=Path, help='Output file (e.g., val.hypo)', required=True)
+optional.add_argument('--batch_size', type=int, default=64)
 optional.add_argument('--banned_tok', nargs='+', default=["[", " [", "UN", " UN", "\n", " \n"], help="tokens to prevent generating")
 optional.add_argument('--max_len', type=int, default=250, help="Max length of generation in BPE tok")
 required.add_argument('--bart_dir', type=Path, help="Path to directory with BART checkpoint", required=True)
 optional.add_argument('--checkpoint', type=str, default='checkpoint_best.pt',
                     help="Which checkpoint file to use for BART")
+optional.add_argument('--gpu', type=int, default=0,
+                    help="device id to use")
 
 args = parser.parse_args()
 print("Args: ", args, file=sys.stderr)
@@ -42,13 +44,14 @@ bart_checkpoint = args.checkpoint
 bart = BARTModel.from_pretrained(
     bart_path,
     checkpoint_file=bart_checkpoint,
-    data_name_or_path='fullstory'
+    # data_name_or_path='fullstory'
+    device_id = args.gpu
 )
 
 bart.eval()
 use_cuda = torch.cuda.is_available()
 if use_cuda:
-    bart.cuda()
+    bart.cuda(args.gpu)
     bart.half()
 
 count = 1
@@ -61,7 +64,7 @@ if args.banned_tok:
     banned_ids = list(set([i.data.item() for t in banned_tok_tensors for i in t]) - pad_toks)
     print("Banning token ids: {}".format(banned_ids))
 
-with open(args.src) as source, open(args.out, 'w') as fout:
+with open(args.infile) as source, open(args.outfile, 'w') as fout:
     sline = source.readline().strip()
     slines = [sline]
     for sline in source:

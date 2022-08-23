@@ -174,6 +174,7 @@ class TranslationTask(FairseqTask):
         args.left_pad_source = options.eval_bool(args.left_pad_source)
         args.left_pad_target = options.eval_bool(args.left_pad_target)
 
+        print(args)
         paths = args.data.split(os.pathsep)
         assert len(paths) > 0
         # find language pair automatically

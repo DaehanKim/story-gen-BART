@@ -5,7 +5,7 @@
 
 cd /Users/seraphinagoldfarb-tarrant/PycharmProjects/Plan-and-write/
 
-disc_data_dir="data/WritingPrompts/srl_storyline_data/unnested_version_data/"  #This is where all of the pre-split data should be, entitled train.txt, disc_train.txt, valid.txt, test.txt
+disc_data_dir="../EMNLPSTORY/full/disc_data/"  #This is where all of the pre-split data should be, entitled train.txt, disc_train.txt, valid.txt, test.txt
 #rep_data_dir="${disc_data_dir}repetition/"
 rel_data_dir="${disc_data_dir}relevance/"
 event_data_dir="${disc_data_dir}event_order/"
